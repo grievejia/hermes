@@ -75,11 +75,51 @@ private:
     Rectangle rectangle;
   }
   
+public:
   Shape(const Circle& c): type(ShapeType::Circle)
   {
     new (&circle) Circle(c);
   }
   
-public:
+  Shape(const Rectangle& r): type(ShapeType::Rectangle)
+  {
+    new (&rectangle) Rectangle(r);
+  }
+  
+  ShapeType getType() const { return type; }
+  
+  Circle& getAsCircle()
+  {
+    assert(type == ShapeType::Circle);
+    return circle;
+  }
+  
+  Rectangle& getAsRectangle()
+  {
+    assert(type == ShapeType::Rectangle);
+    return rectangle;
+  }
+  
+  ~Shape()
+  {
+    switch (type)
+    {
+      case ShapeType::Circle:
+        circle.~Circle();
+        break;
+      case ShapeType::Rectangle:
+        rectangle.~Rectangle();
+        break;
+    }
+  }
 };
 ```
+
+... and that's still not the whole story: depend on my needs I may want a copy/move constructor, a copy/move assignment operator and more convenient static factory functions. A "perfect" tagged union implementation that suits all my needs is going to be two to three times longer that I list here.
+
+Boost provides the "Variant" library that kind of integrate a discriminated union into the language, but it is quite heavy-weight and I don't quite want to base my project on it. I could have also write a library that uses template metaprogramming to do the same thing, but there are some technical challenges there and I'm still not sure whether the result will be easy to use or not. 
+
+This project takes another approach: it takes a specification and produce C++ codes that implement that specification directly. You can view it as a macro system that's independent of the compiler. While template metaprogramming has to obey the syntax rule of the language, this approach enjoys more freedom because I get to define my own syntax that's completely independent. The approach has its own downsides, but it's by far the most easy-to-implement and most easy-to-use method I can think of. 
+
+## The name of this project
+In ancient greek myths, Hermes is the god of transition and boundaries whos delivers messages from the gods. This project does something similar: it takes the programmer's messages of ADT, translates into C++ codes and deliver it to the C++ compiler. 
