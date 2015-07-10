@@ -37,6 +37,12 @@ auto line(ParserA&& p)
 	return lexeme(p, '\n', " \t\r\v\f");
 }
 
+template <typename ParserA>
+auto bigstr(ParserA&& p)
+{
+	return lexeme(p, '\0');
+}
+
 }
 
 #endif

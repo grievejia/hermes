@@ -1,7 +1,8 @@
 #pragma once
 
-#include <string>
-#include <unordered_map>
+#include "Util/DataStructure/VectorMap.h"
+
+#include <experimental/string_view>
 
 namespace hermes
 {
@@ -14,25 +15,20 @@ private:
 
 	using FieldName = std::string;
 	using FieldType = std::string;
-	using FieldMap = std::unordered_map<FieldName, FieldType>;
+	using FieldMap = util::VectorMap<FieldName, FieldType>;
 	FieldMap fieldMap;
 public:
 	using const_iterator = FieldMap::const_iterator;
 
-	SubtypeDescriptor(const TypeName& n): name(n) {}
-	SubtypeDescriptor(TypeName&& n): name(std::move(n)) {}
+	SubtypeDescriptor(const std::experimental::string_view& n): name(n.to_string()) {}
 
 	const TypeName& getName() const { return name; }
 
 	// Return false if the map already contains name
-	bool addField(FieldName&& name, FieldType&& type)
+	bool addField(const std::experimental::string_view& name, const std::experimental::string_view& type)
 	{
-		auto itr = fieldMap.find(name);
-		if (itr != fieldMap.end())
-			return false;
-		
-		fieldMap.insert(itr, std::make_pair(std::move(name), std::move(type)));
-		return true;
+		auto result = fieldMap.try_emplace(name.to_string(), type.to_string());
+		return result.second;
 	}
 
 	bool hasField(const FieldName& name) const
@@ -52,6 +48,7 @@ public:
 
 	const_iterator begin() const { return fieldMap.begin(); }
 	const_iterator end() const { return fieldMap.end(); }
+	size_t size() const { return fieldMap.size(); }
 };
 
 }

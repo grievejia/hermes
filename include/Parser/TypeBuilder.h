@@ -3,7 +3,6 @@
 #include "Type/TypeDescriptor.h"
 
 #include <experimental/string_view>
-#include <iosfwd>
 
 namespace hermes
 {
@@ -14,7 +13,7 @@ private:
 	using StringView = std::experimental::string_view;
 public:
 	static TypeDescriptorList buildType(const StringView&);
-	static TypeDescriptorList loadTypeFromFile(std::ifstream&);
+	static TypeDescriptorList loadTypeFromFile(const char* fileName);
 };
 
 }
